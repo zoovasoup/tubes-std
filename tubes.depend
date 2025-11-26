@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1764176097 source:/mnt/data/.00-home/Documents/codeblocks/tubes/MerkleTree.cpp
+	"MerkleTree.h"
+	<functional>
+	<string>
+	<iostream>
+	<iomanip>
+
+1764176096 /mnt/data/.00-home/Documents/codeblocks/tubes/MerkleTree.h
+	<string>
+	<vector>
+
+1764175806 source:/mnt/data/.00-home/Documents/codeblocks/tubes/Wallet.cpp
+	"Wallet.h"
+	<iostream>
+	<iomanip>
+
+1764176098 /mnt/data/.00-home/Documents/codeblocks/tubes/Wallet.h
+	<string>
+	<vector>
+	"MerkleTree.h"
+
+1764176093 source:/mnt/data/.00-home/Documents/codeblocks/tubes/main.cpp
+	<iostream>
+	"Wallet.h"
+
