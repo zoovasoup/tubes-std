@@ -1,5 +1,4 @@
 #include "Wallet.h"
-#include <cstddef>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -48,13 +47,13 @@ void CryptoWalletSystem::tambahUser(string nama) {
 		while (temp->nextUser) temp = temp->nextUser;
 		temp->nextUser = newUser;
 	}
-	cout << "CREATE USER " << nama << " OK. ID: " << newUser->idUser << endl;
+	cout << "[SUCCESS] User " << nama << "with id: " << newUser ->idUser << endl;
 }
 
 void CryptoWalletSystem::tambahTransaksi(string targetIdUser, string idTx, double nominal) {
 	User* currUser = login(targetIdUser);
 	if (!currUser) {
-		cout << "[ERR] User not found" << endl;
+		cout << "[ERROR] User not found" << endl;
 		return;
 	}
 
@@ -62,7 +61,7 @@ void CryptoWalletSystem::tambahTransaksi(string targetIdUser, string idTx, doubl
 	countTx++;
 
 	if(idTx == "AUTO") {
-		newTx->idTx = "TX_GL_" + to_string(countTx);
+		newTx->idTx = "TX-" + to_string(countTx);
 	} else {
 		newTx->idTx = idTx;
 	}
@@ -82,7 +81,7 @@ void CryptoWalletSystem::tambahTransaksi(string targetIdUser, string idTx, doubl
 	currUser->myTransactions.push_back(newTx); 
 
 	updateGlobalMerkleTree();
-	cout << "[SUCCESS] 1 Transaction has been added. (New hash block: " << globalMerkleHash << ")" << endl;
+	cout << "[SUCCESS] Transaction has been added. (New hash block: " << globalMerkleHash << ")" << endl;
 }
 
 void CryptoWalletSystem::cariDanValidasiTransaksi(string idTx) {
@@ -113,9 +112,9 @@ void CryptoWalletSystem::cariDanValidasiTransaksi(string idTx) {
 		cout << "   Owner   : " << foundTx->ownerId << endl;
 		cout << "   Amount  : " << foundTx->nominal << endl;
 		cout << "   Hash    : " << targetHash << endl;
-		cout << "   Status  : VALID (Confirmed in Global Tree)" << endl;
+		cout << "   Status  :  [VALID] Confirmed in Global Tree"<< endl;
 	} else {
-		cout << "FALSE (Not valid in Global Tree)" << endl;
+		cout << "[FALSE] Not valid in Global Tree" << endl;
 	}
 }
 
@@ -137,12 +136,12 @@ void CryptoWalletSystem::printTxList() {
 		return;
 	}
 
-	cout << "\n================ GLOBAL TRANSACTION LEDGER ================" << endl;
-	cout << "-----------------------------------------------------------" << endl;
+	cout << "\n======= GLOBAL TRANSACTION LEDGER =======" << endl;
+	cout << "-------------------------------------------" << endl;
 	cout << " | " << left << setw(12) << "Tx ID"
 		<< " | " << left << setw(8) << "Owner"
 		<< " | " << left << setw(12) << "Amount" << " |" << endl;
-	cout << "-----------------------------------------------------------" << endl;
+	cout << "-------------------------------------------" << endl;
 
 	while (tx != nullptr) {
 		cout << " | " << left << setw(12) << tx->idTx
@@ -150,7 +149,7 @@ void CryptoWalletSystem::printTxList() {
 			<< " | " << left << setw(12) << tx->nominal << " |" << endl;
 		tx = tx->nextTx;
 	}
-	cout << "-----------------------------------------------------------" << endl;
+	cout << "-------------------------------------------" << endl;
 }
 
 

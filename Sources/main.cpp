@@ -27,7 +27,7 @@ int main() {
 
 	while (true) {
 		if (loggedInUser) {
-			cout << "\ncryptoWallet(" << loggedInUser->idUser << ")~ ";
+			cout << "\ncryptoWallet(" << loggedInUser->idUser << "-" << loggedInUser->nama << ")~ ";
 		} else {
 			cout << "\ncryptoWallet~ ";
 		}
@@ -54,7 +54,7 @@ int main() {
 			cout << "  tx <amount>              : Add transaction (need login)\n";
 			cout << "  verify <txid>            : Validate a transaction\n";
 			cout << "  list_tx                  : Show global transaction list\n";
-			cout << "  list_tx -u               : show all transaction for current user\n";
+			cout << "  list_tx -u               : Show all transaction for current user\n";
 		}
 		else if (cmd == "register") {
 			if (args.size() < 2) cout << "[ERROR] missing name. Usage: register <name>" << endl;
