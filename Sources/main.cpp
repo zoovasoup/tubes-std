@@ -53,25 +53,33 @@ int main() {
 			cout << "  tree                     : Show global tree representation\n";
 			cout << "  tx <amount>              : Add transaction (need login)\n";
 			cout << "  verify <txid>            : Validate a transaction\n";
-			cout << "  list_tx                  : show all transaction for current user\n";
+			cout << "  list_tx                  : Show global transaction list\n";
+			cout << "  list_tx -u               : show all transaction for current user\n";
 		}
 		else if (cmd == "register") {
-			if (args.size() < 2) cout << "Error: missing name. Usage: register <name>" << endl;
+			if (args.size() < 2) cout << "[ERROR] missing name. Usage: register <name>" << endl;
 			else system.tambahUser(args[1]);
 		}
 		else if (cmd =="list_tx"){
-			if (!loggedInUser) {
-				cout << "Error: You must be logged in to see the user transaction." << endl;
+			if (args.size() == 1){
+				system.printTxList();
 				continue;
 			}
+
+			if (args[1] == "-u"){
+				if (!loggedInUser) {
+					cout << "[ERROR] You must be logged in to see the user transaction." << endl;
+					continue;
+				}
 			system.printUserTxList(loggedInUser->idUser);
+			}
 		}
 		else if (cmd == "list") {
 			system.tampilkanLaporan();
 		}
 		else if (cmd == "login") {
 			if (args.size() < 2) {
-				cout << "Error: missing ID. Usage: login <id>" << endl;
+				cout << "[ERROR] missing ID. Usage: login <id>" << endl;
 				continue;
 			}
 			User* found = system.login(args[1]);
@@ -90,18 +98,18 @@ int main() {
 		}
 		else if (cmd == "verify") {
 			if (args.size() < 2) {
-				cout << "Error: usage -> verify <tx_id>" << endl;
+				cout << "[ERROR] usage -> verify <tx_id>" << endl;
 				continue;
 			}
 			system.cariDanValidasiTransaksi(args[1]);
 		}
 		else if (cmd == "tx") {
 			if (!loggedInUser) {
-				cout << "Error: You must be logged in to make transactions." << endl;
+				cout << "[ERROR] You must be logged in to make transactions." << endl;
 				continue;
 			}
 			if (args.size() < 2) {
-				cout << "Error: usage -> tx <amount>" << endl;
+				cout << "[ERROR] usage -> tx <amount>" << endl;
 				continue;
 			}
 			double amount = stod(args[1]);
@@ -110,7 +118,7 @@ int main() {
 		}
 		else if (cmd == "verify") {
 			if (args.size() < 3) {
-				cout << "Error: usage -> verify <tx_id>" << endl;
+				cout << "[ERROR] usage -> verify <tx_id>" << endl;
 				continue;
 			}
 			system.cariDanValidasiTransaksi(args[1]);

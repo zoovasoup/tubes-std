@@ -47,6 +47,7 @@ public:
 	User* login(string id);
 	void printGlobalTree();
 	void printUserTxList(string idUser);
+	void printTxList();
 
 };
 

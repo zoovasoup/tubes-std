@@ -82,7 +82,7 @@ void CryptoWalletSystem::tambahTransaksi(string targetIdUser, string idTx, doubl
 	currUser->myTransactions.push_back(newTx); 
 
 	updateGlobalMerkleTree();
-	cout << "INSERT GLOBAL 0 1 (Block Hash: " << globalMerkleHash << ")" << endl;
+	cout << "[SUCCESS] 1 Transaction has been added. (New hash block: " << globalMerkleHash << ")" << endl;
 }
 
 void CryptoWalletSystem::cariDanValidasiTransaksi(string idTx) {
@@ -128,6 +128,31 @@ void CryptoWalletSystem::printGlobalTree() {
 		cout << "(Empty Tree)" << endl;
 	}
 }
+
+void CryptoWalletSystem::printTxList() {
+	Transaksi* tx = headGlobalTx;
+
+	if (tx == nullptr) {
+		cout << "[INFO] Global Ledger kosong (Belum ada transaksi)." << endl;
+		return;
+	}
+
+	cout << "\n================ GLOBAL TRANSACTION LEDGER ================" << endl;
+	cout << "-----------------------------------------------------------" << endl;
+	cout << " | " << left << setw(12) << "Tx ID"
+		<< " | " << left << setw(8) << "Owner"
+		<< " | " << left << setw(12) << "Amount" << " |" << endl;
+	cout << "-----------------------------------------------------------" << endl;
+
+	while (tx != nullptr) {
+		cout << " | " << left << setw(12) << tx->idTx
+			<< " | " << left << setw(8) << tx->ownerId
+			<< " | " << left << setw(12) << tx->nominal << " |" << endl;
+		tx = tx->nextTx;
+	}
+	cout << "-----------------------------------------------------------" << endl;
+}
+
 
 void CryptoWalletSystem::printUserTxList(string id) {
     User* u = headUser;
