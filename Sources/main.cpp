@@ -1,32 +1,116 @@
 #include <iostream>
+#include <sstream>
+#include <vector>
 #include "Wallet.h"
 
 using namespace std;
 
+// Helper to split string by spaces
+vector<string> parseCommand(string input) {
+    vector<string> args;
+    stringstream ss(input);
+    string word;
+    while (ss >> word) {
+        args.push_back(word);
+    }
+    return args;
+}
+
 int main() {
     CryptoWalletSystem system;
+    User* loggedInUser = nullptr;
+    string inputLine;
 
-    cout << "=== INISIALISASI SISTEM ===" << endl;
+    system.tambahUser("Alice"); 
+    system.tambahUser("Bob");   
+		system.tambahTransaksi("U2", "AUTO", 500);
 
-    system.tambahUser("U01", "Alice");
-    system.tambahUser("U02", "Bob");
+    while (true) {
+        if (loggedInUser) {
+            cout << "cryptoWallet(" << loggedInUser->idUser << ")~ ";
+        } else {
+            cout << "cryptoWallet~ ";
+        }
 
-    cout << "\n=== SIMULASI TRANSAKSI ===" << endl;
+        if (!getline(cin, inputLine)) break; 
+        if (inputLine.empty()) continue;
 
-    system.tambahTransaksi("U01", "TX_A1", "Deposit", 100);
-    system.tambahTransaksi("U01", "TX_A2", "Buy NFT", 50);
+        vector<string> args = parseCommand(inputLine);
+        if (args.empty()) continue;
 
-    system.tambahTransaksi("U02", "TX_B1", "Deposit", 500);
+        string cmd = args[0];
 
-    system.tampilkanLaporan();
-
-    cout << "\n=== PENGUJIAN FITUR PENCARIAN & VALIDASI ===" << endl;
-
-    system.cariDanValidasiTransaksi("U01", "TX_A1");
-
-    system.cariDanValidasiTransaksi("U01", "TX_GHOST");
-
-    system.cariDanValidasiTransaksi("U99", "TX_A1");
+        if (cmd == "exit" || cmd == "quit") {
+            cout << "Bye." << endl;
+            break;
+        } 
+        else if (cmd == "help") {
+            cout << "Available commands:\n";
+            cout << "  register <name>          : Create new user\n";
+            cout << "  login <id>               : Login as user\n";
+            cout << "  logout                   : Logout current user\n";
+            cout << "  list                     : Show all users\n";
+            cout << "  tree <userId>            : Show user id transaction tree represenatation\n";
+            cout << "  tx <amount>              : Add transaction (need login)\n";
+            cout << "  verify <txid>  					: Validate a transaction\n";
+        }
+        else if (cmd == "register") {
+            if (args.size() < 2) cout << "Error: missing name. Usage: register <name>" << endl;
+            else system.tambahUser(args[1]);
+        }
+        else if (cmd == "list") {
+            system.tampilkanLaporan();
+        }
+        else if (cmd == "login") {
+            if (args.size() < 2) {
+                cout << "Error: missing ID. Usage: login <id>" << endl;
+                continue;
+            }
+            User* found = system.login(args[1]);
+            if (found) {
+                loggedInUser = found;
+                cout << "You are now logged in as " << found->nama << endl;
+            } else {
+                cout << "Login failed: User ID not found." << endl;
+            }
+        }
+        else if (cmd == "logout") {
+            loggedInUser = nullptr;
+        }
+        else if (cmd == "tree") {
+            system.printGlobalTree();
+        }
+        else if (cmd == "verify") {
+            if (args.size() < 2) {
+                cout << "Error: usage -> verify <tx_id>" << endl;
+                continue;
+            }
+            system.cariDanValidasiTransaksi(args[1]);
+        }
+        else if (cmd == "tx") {
+            if (!loggedInUser) {
+                cout << "Error: You must be logged in to make transactions." << endl;
+                continue;
+            }
+            if (args.size() < 2) {
+                cout << "Error: usage -> tx <amount>" << endl;
+                continue;
+            }
+            double amount = stod(args[1]);
+            
+            system.tambahTransaksi(loggedInUser->idUser, "AUTO", amount);
+        }
+        else if (cmd == "verify") {
+            if (args.size() < 3) {
+                cout << "Error: usage -> verify <tx_id>" << endl;
+                continue;
+            }
+            system.cariDanValidasiTransaksi(args[1]);
+        }
+        else {
+            cout << "Unknown command: " << cmd << endl;
+        }
+    }
 
     return 0;
 }

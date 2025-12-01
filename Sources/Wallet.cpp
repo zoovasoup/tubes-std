@@ -1,37 +1,43 @@
 #include "Wallet.h"
 #include <iostream>
-#include <iomanip>
+#include <string>
 
 using namespace std;
 
 CryptoWalletSystem::CryptoWalletSystem() {
     headUser = nullptr;
+    headGlobalTx = nullptr;     
+    globalMerkleRoot = nullptr; 
+    globalMerkleHash = "EMPTY";
 }
 
-void CryptoWalletSystem::updateMerkleTree(User* user) {
+int CryptoWalletSystem::countUser = 0;
+int CryptoWalletSystem::countTx = 0; 
+
+void CryptoWalletSystem::updateGlobalMerkleTree() {
     vector<string> txHashes;
-    Transaksi* curr = user->headTx;
+    Transaksi* curr = headGlobalTx;
+    
     while (curr != nullptr) {
-        string rawData = curr->idTx + curr->jenis + to_string((int)curr->nominal);
+        string rawData = curr->idTx + curr->ownerId + to_string((int)curr->nominal);
         txHashes.push_back(computeHash(rawData));
         curr = curr->nextTx;
     }
 
     if (!txHashes.empty()) {
-        if (user->merkleTreeRoot) deleteMerkleTree(user->merkleTreeRoot);
-        user->merkleTreeRoot = buildMerkleRecursive(txHashes, 0, txHashes.size() - 1);
-        user->merkleRootHash = user->merkleTreeRoot->hash;
+        if (globalMerkleRoot) deleteMerkleTree(globalMerkleRoot);
+        globalMerkleRoot = buildMerkleRecursive(txHashes, 0, txHashes.size() - 1);
+        globalMerkleHash = globalMerkleRoot->hash;
     }
 }
 
-void CryptoWalletSystem::tambahUser(string id, string nama) {
-    User* newUser = new User;
-    newUser->idUser = id;
+void CryptoWalletSystem::tambahUser(string nama) {
+    countUser++;
+    User* newUser = new User();
+
+    newUser->idUser = "U" + to_string(countUser);
     newUser->nama = nama;
-    newUser->headTx = nullptr;
     newUser->nextUser = nullptr;
-    newUser->merkleTreeRoot = nullptr;
-    newUser->merkleRootHash = "EMPTY";
 
     if (!headUser) {
         headUser = newUser;
@@ -40,92 +46,45 @@ void CryptoWalletSystem::tambahUser(string id, string nama) {
         while (temp->nextUser) temp = temp->nextUser;
         temp->nextUser = newUser;
     }
-    cout << "[INFO] User dibuat: " << nama << endl;
+    cout << "CREATE USER " << nama << " OK. ID: " << newUser->idUser << endl;
 }
 
-void CryptoWalletSystem::tambahTransaksi(string targetIdUser, string idTx, string jenis, double nominal) {
-    User* currUser = headUser;
-    while (currUser && currUser->idUser != targetIdUser) {
-        currUser = currUser->nextUser;
-    }
-
+void CryptoWalletSystem::tambahTransaksi(string targetIdUser, string idTx, double nominal) {
+    User* currUser = login(targetIdUser);
     if (!currUser) {
-        cout << "[ERR] User tidak ditemukan!" << endl;
+        cout << "[ERR] User not found" << endl;
         return;
     }
 
     Transaksi* newTx = new Transaksi;
-    newTx->idTx = idTx;
-    newTx->jenis = jenis;
+    countTx++;
+
+    if(idTx == "AUTO") {
+        newTx->idTx = "TX_GL_" + to_string(countTx);
+    } else {
+        newTx->idTx = idTx;
+    }
+    
+    newTx->ownerId = currUser->idUser; 
     newTx->nominal = nominal;
     newTx->nextTx = nullptr;
 
-    if (currUser->headTx == nullptr) {
-        currUser->headTx = newTx;
+    if (headGlobalTx == nullptr) {
+        headGlobalTx = newTx;
     } else {
-        Transaksi* t = currUser->headTx;
+        Transaksi* t = headGlobalTx;
         while (t->nextTx) t = t->nextTx;
         t->nextTx = newTx;
     }
 
-    updateMerkleTree(currUser);
+    currUser->myTransactions.push_back(newTx); 
 
-    cout << "[SUKSES] Transaksi " << idTx << " masuk ke wallet " << currUser->nama << endl;
-    cout << "         -> Security Root diperbarui: " << currUser->merkleRootHash << endl;
+    updateGlobalMerkleTree();
+    cout << "INSERT GLOBAL 0 1 (Block Hash: " << globalMerkleHash << ")" << endl;
 }
 
-void CryptoWalletSystem::tampilkanLaporan() {
-    User* u = headUser;
-    cout << "\n=======================================================" << endl;
-    cout << "           LAPORAN SISTEM DOMPET KRIPTO" << endl;
-    cout << "=======================================================" << endl;
-
-    while (u != nullptr) {
-        cout << "USER: " << u->nama << " (ID: " << u->idUser << ")" << endl;
-        cout << "ROOT HASH: " << u->merkleRootHash << endl;
-
-        cout << "\n   [VISUALISASI MERKLE TREE USER INI]" << endl;
-        if (u->merkleTreeRoot) {
-            // [UPDATE] Memanggil fungsi visualisasi dari MerkleTree.cpp
-            printMerkleTree(u->merkleTreeRoot);
-        } else {
-            cout << "   (Tree belum terbentuk / Tidak ada transaksi)" << endl;
-        }
-
-        cout << "\n   [DETAIL RIWAYAT TRANSAKSI]" << endl;
-        Transaksi* t = u->headTx;
-        if (!t) cout << "   (Tidak ada transaksi)" << endl;
-        else {
-            cout << "   ---------------------------------------" << endl;
-            cout << "   | ID      | Jenis    | Nominal        |" << endl;
-            cout << "   ---------------------------------------" << endl;
-            while (t != nullptr) {
-                cout << "   | " << left << setw(8) << t->idTx
-                     << "| " << left << setw(9) << t->jenis
-                     << "| " << left << setw(14) << t->nominal << " |" << endl;
-                t = t->nextTx;
-            }
-            cout << "   ---------------------------------------" << endl;
-        }
-        cout << "\n-------------------------------------------------------" << endl;
-        u = u->nextUser;
-    }
-}
-
-void CryptoWalletSystem::cariDanValidasiTransaksi(string targetIdUser, string idTx) {
-    cout << "\n--- VALIDASI TRANSAKSI: " << idTx << " (" << targetIdUser << ") ---" << endl;
-
-    User* currUser = headUser;
-    while (currUser && currUser->idUser != targetIdUser) {
-        currUser = currUser->nextUser;
-    }
-
-    if (!currUser) {
-        cout << "[GAGAL] User ID " << targetIdUser << " tidak ditemukan." << endl;
-        return;
-    }
-
-    Transaksi* t = currUser->headTx;
+void CryptoWalletSystem::cariDanValidasiTransaksi(string idTx) {
+    Transaksi* t = headGlobalTx;
     Transaksi* foundTx = nullptr;
 
     while (t != nullptr) {
@@ -137,24 +96,66 @@ void CryptoWalletSystem::cariDanValidasiTransaksi(string targetIdUser, string id
     }
 
     if (!foundTx) {
-        cout << "[GAGAL] Transaksi tidak ditemukan dalam riwayat User." << endl;
+        cout << "Tx not found in Global Ledger." << endl;
         return;
     }
 
-    cout << "[INFO] Data ditemukan di Linked List:" << endl;
-    cout << "       Nominal: " << foundTx->nominal << " | Jenis: " << foundTx->jenis << endl;
-
-    string rawData = foundTx->idTx + foundTx->jenis + to_string((int)foundTx->nominal);
+    string rawData = foundTx->idTx + foundTx->ownerId + to_string((int)foundTx->nominal);
     string targetHash = computeHash(rawData);
 
-    cout << "       Hash Data: " << targetHash << endl;
-    cout << "       Memverifikasi ke Merkle Tree..." << endl;
-
-    bool isValid = searchMerkleHash(currUser->merkleTreeRoot, targetHash);
+    bool isValid = searchMerkleHash(globalMerkleRoot, targetHash);
 
     if (isValid) {
-        cout << "[VALID] Transaksi TERVERIFIKASI! Hash ditemukan dalam struktur Tree." << endl;
+        cout << "Transaction Found in Global Block:" << endl;
+        cout << "   ID      : " << foundTx->idTx << endl;
+        cout << "   Owner   : " << foundTx->ownerId << endl;
+        cout << "   Amount  : " << foundTx->nominal << endl;
+        cout << "   Hash    : " << targetHash << endl;
+        cout << "   Status  : VALID (Confirmed in Global Tree)" << endl;
     } else {
-        cout << "[BAHAYA] Transaksi TIDAK VALID! Data mungkin telah dimanipulasi (Hash tidak cocok)." << endl;
+        cout << "FALSE (Not valid in Global Tree)" << endl;
     }
+}
+
+void CryptoWalletSystem::printGlobalTree() {
+    cout << "=== GLOBAL MERKLE TREE ===" << endl;
+    cout << "Root Hash: " << globalMerkleHash << endl;
+    if (globalMerkleRoot) {
+        printMerkleTree(globalMerkleRoot);
+    } else {
+        cout << "(Empty Tree)" << endl;
+    }
+}
+
+void CryptoWalletSystem::tampilkanLaporan() {
+    User* u = headUser;
+    cout << "\nGLOBAL LEDGER REPORT" << endl;
+    cout << "------------------------------------------------" << endl;
+    
+    while (u != nullptr) {
+        cout << "User: " << u->nama << " (" << u->idUser << ")" << endl;
+        cout << "Owned Transactions (References to Global List):" << endl;
+        
+        if (u->myTransactions.empty()) {
+            cout << "   (No transactions)" << endl;
+        } else {
+            for (Transaksi* tx : u->myTransactions) {
+                cout << "   -> [" << tx->idTx << "] " << ": " << tx->nominal << endl;
+            }
+        }
+        cout << endl;
+        u = u->nextUser;
+    }
+    cout << "Global Root Hash: " << globalMerkleHash << endl;
+}
+
+User* CryptoWalletSystem::login(string id){
+    User* temp = headUser;
+    while (temp){
+        if (temp->idUser == id){
+            return temp;
+        }
+        temp = temp->nextUser;
+    }
+    return nullptr;
 }

@@ -9,7 +9,7 @@ using namespace std;
 
 struct Transaksi {
     string idTx;
-    string jenis;
+    string ownerId;
     double nominal;
 
     Transaksi* nextTx;
@@ -18,30 +18,34 @@ struct Transaksi {
 struct User {
     string idUser;
     string nama;
-
-    Transaksi* headTx;
+    
+    vector<Transaksi*> myTransactions; 
+    
     User* nextUser;
-
-    string merkleRootHash;
-    MerkleNode* merkleTreeRoot;
 };
-
 
 class CryptoWalletSystem {
 private:
     User* headUser;
+    
+    Transaksi* headGlobalTx;       
+    MerkleNode* globalMerkleRoot;  
+    string globalMerkleHash;       
 
-    void updateMerkleTree(User* user);
+    static int countUser;
+    static int countTx;
+
+    void updateGlobalMerkleTree(); 
 
 public:
     CryptoWalletSystem();
 
-    void tambahUser(string id, string nama);
-    void tambahTransaksi(string targetIdUser, string idTx, string jenis, double nominal);
-
-    void tampilkanLaporan();
-
-    void cariDanValidasiTransaksi(string targetIdUser, string idTx);
+    void tambahUser(string nama);
+    void tambahTransaksi(string targetIdUser, string idTx, double nominal);
+    void tampilkanLaporan(); 
+    void cariDanValidasiTransaksi(string idTx); 
+    User* login(string id);
+    void printGlobalTree(); 
 };
 
 #endif
