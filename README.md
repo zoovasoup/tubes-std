@@ -38,15 +38,17 @@ This project was developed as part of the telkom university **Data Structures** 
 
 ## 🧱 Data Structures Used
 
-* **Single Linked List**
+* **Array / Vector**
+  * Stores transactions owned by a specific user
+  * Provides fast indexed access per user
 
-  * User list
-  * Global transaction ledger
+* **Single Linked List**
+  * User registry
+  * Global transaction ledger (append-only)
 
 * **Binary Tree (Merkle Tree)**
-
   * Built recursively from transaction hashes
-  * Used for integrity verification
+  * Used for global data integrity verification
 
 ---
 
@@ -84,7 +86,7 @@ This project was developed as part of the telkom university **Data Structures** 
 CryptoApp.exe
 ```
 
-(Executable is already included in the repository.)
+(Executable is already included in the `releases`.)
 
 ---
 
@@ -121,19 +123,6 @@ Root Hash: 19283746
 cryptoWallet(U1-Alice)~ verify TX-1
 [VALID] Transaction confirmed in Merkle Tree
 ```
-
----
-
-## 📄 Documentation
-
-A full technical explanation of:
-
-* Merkle Tree construction
-* Recursive algorithms
-* Data structure design
-* Program flow
-
-is available in **`document.md`** 
 
 ---
 
