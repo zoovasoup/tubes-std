@@ -2,7 +2,7 @@
 
 A command-line **Crypto Wallet simulation** implemented in **C++**, demonstrating core **data structure concepts** such as **Linked Lists**, **Binary Trees**, and **Merkle Trees** for transaction integrity verification.
 
-This project was developed as part of the telkom university **Data Structures** 2024 course assignment, focusing on practical implementation of non-linear data structures.
+This project was developed as part of the telkom university **Data Structures** 2025 course assignment, focusing on practical implementation of non-linear data structures.
 
 ---
 
