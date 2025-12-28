@@ -82,11 +82,50 @@ This project was developed as part of the telkom university **Data Structures** 
 
 ### Windows
 
+(Executable is already included in the `releases`.)
+
 ```cmd
 CryptoApp.exe
 ```
+> ⚠ Windows SmartScreen Notice
+> 
+> When running CryptoApp.exe, Windows may display a “Windows protected your PC” warning.
+> 
+> This does not indicate malware. The warning appears because the executable is not digitally signed and therefore has no established reputation with Microsoft SmartScreen. This is common for open-source and academic projects distributed via GitHub.
+> 
+> If you still have concerns, you are free to inspect the source code or analyze the binary using a decompiler, as the project is fully transparent and does not perform any hidden or malicious actions.
+> 
+> To run the application:
+> - Click More info
+> - Click Run anyway
+> 
+> The application is a simple command-line educational program and does not install system services, modify the registry, or access sensitive system resources.
 
-(Executable is already included in the `releases`.)
+## 🛠 Manual Compilation Guide
+
+### Linux / macOS (GCC / Clang)
+
+#### Requirements
+- `g++` atau `clang++`
+- Compiler support C++17
+
+#### Compile
+```bash
+g++ -std=c++17 Sources/*.cpp -IHeaders -o CryptoApp
+```
+
+---
+
+### Windows (MinGW / g++)
+
+#### Requirements
+- MinGW-w64
+- `g++` available in PATH
+
+#### Compile
+```cmd
+g++ -std=gnu++17 Sources\*.cpp -IHeaders -o CryptoApp.exe
+```
 
 ---
 
